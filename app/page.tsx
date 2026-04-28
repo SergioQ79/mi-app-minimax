@@ -7,39 +7,168 @@ type Message = {
   content: string;
 };
 
+type Subtema = {
+  label: string;
+  text: string;
+};
+
+type Tema = {
+  label: string;
+  subtemas: Subtema[];
+};
+
 const INITIAL_MESSAGE: Message = {
   role: "assistant",
   content:
-    "Hola Sergio 👋 Soy tu asistente de RRHH. Respondeme preguntas sobre las políticas internas de la empresa.",
+    "Hola Sergio 👋 Soy tu asistente de RRHH. Elegí un tema o escribime tu consulta sobre las políticas internas de la empresa.",
 };
+
+const temas: Tema[] = [
+  {
+    label: "Vacaciones",
+    subtemas: [
+      {
+        label: "Quién las define",
+        text: "¿Quién define mis vacaciones?",
+      },
+      {
+        label: "Cambiar fecha",
+        text: "¿Puedo cambiar la fecha de mis vacaciones?",
+      },
+      {
+        label: "Fecha límite",
+        text: "¿Hasta cuándo tengo tiempo para tomarme las vacaciones?",
+      },
+      {
+        label: "30 de abril",
+        text: "¿Qué pasa si no me tomo las vacaciones antes del 30 de abril?",
+      },
+      {
+        label: "Aviso previo",
+        text: "¿Con cuánta anticipación debo avisar si no puedo tomarme las vacaciones asignadas?",
+      },
+    ],
+  },
+  {
+    label: "Sueldo",
+    subtemas: [
+      {
+        label: "Cobré menos",
+        text: "¿Por qué cobré menos después de mis vacaciones?",
+      },
+      {
+        label: "Sueldo parcial",
+        text: "¿Por qué el sueldo vino parcial si ya me pagaron las vacaciones?",
+      },
+      {
+        label: "Depósito menor",
+        text: "¿Por qué me depositaron menos después de salir de vacaciones?",
+      },
+      {
+        label: "Aumentos",
+        text: "¿Los aumentos salariales se aplican aunque el mes sea parcial?",
+      },
+      {
+        label: "Revisar liquidación",
+        text: "¿Cómo reviso si la liquidación de vacaciones está bien hecha?",
+      },
+    ],
+  },
+  {
+    label: "Ausencias",
+    subtemas: [
+      {
+        label: "Pedir permiso",
+        text: "¿Cómo pido permiso o una ausencia?",
+      },
+      {
+        label: "Medio válido",
+        text: "¿Por qué medio tengo que pedir autorización?",
+      },
+      {
+        label: "Días no laborables",
+        text: "¿Los días no laborables se trabajan?",
+      },
+    ],
+  },
+  {
+    label: "Vivienda",
+    subtemas: [
+      {
+        label: "Visitas",
+        text: "¿Se permiten visitas en la vivienda de la empresa?",
+      },
+      {
+        label: "Fiestas",
+        text: "¿Puedo hacer reuniones o fiestas en la vivienda?",
+      },
+      {
+        label: "Daños",
+        text: "¿Qué pasa si rompo algo en la vivienda?",
+      },
+      {
+        label: "Devolución",
+        text: "¿Cuándo debo devolver la vivienda de la empresa?",
+      },
+    ],
+  },
+  {
+    label: "Vehículos",
+    subtemas: [
+      {
+        label: "Uso personal",
+        text: "¿Puedo usar un vehículo de la empresa para algo personal?",
+      },
+      {
+        label: "Falla",
+        text: "¿Qué tengo que hacer si el vehículo tiene una falla?",
+      },
+      {
+        label: "Accidente",
+        text: "¿Qué hago si tengo un accidente con un vehículo de la empresa?",
+      },
+      {
+        label: "Multa/control",
+        text: "¿Qué hago si tengo una multa o un control policial con un vehículo de la empresa?",
+      },
+    ],
+  },
+  {
+    label: "Adelantos",
+    subtemas: [
+      {
+        label: "Pedir adelanto",
+        text: "¿La empresa da adelantos de sueldo?",
+      },
+      {
+        label: "Emergencia",
+        text: "¿Cómo solicito un adelanto por emergencia?",
+      },
+    ],
+  },
+  {
+    label: "Recibo",
+    subtemas: [
+      {
+        label: "Disponibilidad",
+        text: "¿Cuándo va a estar disponible mi recibo de sueldo?",
+      },
+    ],
+  },
+];
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [model, setModel] = useState("openrouter/free");
+  const [temaActivo, setTemaActivo] = useState(temas[0].label);
 
   const chatContentRef = useRef<HTMLDivElement | null>(null);
   const chipLockRef = useRef(false);
 
-  const sugerencias = [
-    {
-      label: "Vacaciones",
-      text: "¿Quién define mis vacaciones?",
-    },
-    {
-      label: "Sueldo",
-      text: "¿Por qué cobré menos después de vacaciones?",
-    },
-    {
-      label: "Ausencias",
-      text: "¿Cómo pido permiso de ausencia?",
-    },
-    {
-      label: "Recibo",
-      text: "¿Cuándo está disponible mi recibo?",
-    },
-  ];
+  const temaSeleccionado =
+    temas.find((tema) => tema.label === temaActivo) || temas[0];
 
   function scrollToBottom(behavior: ScrollBehavior = "smooth") {
     const container = chatContentRef.current;
@@ -136,7 +265,7 @@ export default function Home() {
     }
   }
 
-  function tocarChip(texto: string) {
+  function tocarSubtema(texto: string) {
     if (loading || chipLockRef.current) return;
 
     chipLockRef.current = true;
@@ -146,6 +275,11 @@ export default function Home() {
     window.setTimeout(() => {
       chipLockRef.current = false;
     }, 700);
+  }
+
+  function seleccionarTema(label: string) {
+    if (loading) return;
+    setTemaActivo(label);
   }
 
   async function sendMessage(e: FormEvent) {
@@ -158,7 +292,7 @@ export default function Home() {
       {
         role: "assistant",
         content:
-          "Chat reiniciado 👋 Preguntame algo sobre las políticas internas de RRHH.",
+          "Chat reiniciado 👋 Elegí un tema o preguntame algo sobre las políticas internas de RRHH.",
       },
     ]);
 
@@ -194,24 +328,40 @@ export default function Home() {
         </header>
 
         <div className="storiesBar">
-          {sugerencias.map((sugerencia) => (
+          {temas.map((tema) => (
             <button
-              key={sugerencia.label}
-              className="suggestionChip"
+              key={tema.label}
               type="button"
+              className={`topicChip ${
+                temaActivo === tema.label ? "topicChipActive" : ""
+              }`}
+              disabled={loading}
+              onClick={() => seleccionarTema(tema.label)}
+            >
+              {tema.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="subtopicsBar">
+          {temaSeleccionado.subtemas.map((subtema) => (
+            <button
+              key={subtema.label}
+              type="button"
+              className="subtopicChip"
               disabled={loading}
               onPointerUp={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                tocarChip(sugerencia.text);
+                tocarSubtema(subtema.text);
               }}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                tocarChip(sugerencia.text);
+                tocarSubtema(subtema.text);
               }}
             >
-              {sugerencia.label}
+              {subtema.label}
             </button>
           ))}
         </div>

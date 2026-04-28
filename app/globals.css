@@ -475,3 +475,62 @@ input {
 .suggestionChip:disabled {
   opacity: 0.45;
 }
+
+.topicChip {
+  transition: all 0.15s ease;
+}
+
+.topicChipActive {
+  color: #ffffff !important;
+  border-color: transparent !important;
+  background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045) !important;
+  box-shadow: 0 8px 18px rgba(214, 41, 118, 0.22) !important;
+}
+
+.subtopicsBar {
+  position: relative;
+  z-index: 40;
+  padding: 9px 12px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 1px solid #f1f1f1;
+  background: #fffafc;
+  flex-shrink: 0;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+}
+
+.subtopicsBar::-webkit-scrollbar {
+  display: none;
+}
+
+.subtopicChip {
+  position: relative;
+  z-index: 50;
+  pointer-events: auto;
+  border: 1px solid rgba(214, 41, 118, 0.18);
+  background: #ffffff;
+  color: #d62976;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(214, 41, 118, 0.08);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.subtopicChip:active {
+  transform: scale(0.97);
+}
+
+.subtopicChip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
